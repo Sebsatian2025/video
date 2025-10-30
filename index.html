@@ -56,7 +56,6 @@
       background: rgba(255, 255, 255, 0.1); 
       border-radius: 15px;
       padding: 40px;
-      /* Filtro clave para el desenfoque */
       backdrop-filter: blur(10px); 
       border: 1px solid rgba(255, 255, 255, 0.2); 
       box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
@@ -76,7 +75,6 @@
     @media (max-width: 767px) {
       video { display: none; }
       .overlay {
-        /* Muestra el fondo liso si el video está oculto */
         background: #333;
         background-size: cover;
       }
@@ -85,8 +83,7 @@
 </head>
 <body>
   
-  <video id="backgroundVideo" class="video-background" autoplay muted loop playsinline>
-    </video>
+  <video id="backgroundVideo" class="video-background" autoplay muted loop playsinline></video>
 
   <div class="overlay"></div>
 
@@ -94,9 +91,9 @@
     
     <select id="videoSelector" onchange="loadNewVideo()">
         <option value="" disabled selected>--- Selecciona un video ---</option> 
-        <option value="video-0">Video 1 (Defecto)</option>
-        <option value="video-1">Video 2 (Demo V1)</option>
-        <option value="video-2">Video 3 (Prueba Final)</option>
+        <option value="video-0">Video 1 (Fondo)</option>
+        <option value="video-1">Video 2 (Fondo2)</option>
+        <option value="video-2">Video 3 (Fondo3)</option>
         </select>
 
     <div class="card-glass">
@@ -107,12 +104,12 @@
   </div>
 
   <script>
-    // 💡 LISTA DE ARCHIVOS REALES (MODIFICA ESTO con los nombres base de tus archivos)
+    // 💡 LISTA DE ARCHIVOS REALES (¡AJUSTA ESTO!)
     const videoFiles = [
-        "fondo",          // video-0 -> assets/fondo.webm & .mp4
-        "fondo2",        // video-1 -> assets/demo-v1.webm & .mp4
-        "fondo3",   // video-2 -> assets/prueba-final.webm & .mp4
-        // ... Agrega más nombres base aquí, ej: "clip-final"
+        "fondo",      // video-0
+        "fondo2",     // video-1
+        "fondo3",     // video-2
+        // ...
     ];
 
     function loadNewVideo() {
@@ -127,7 +124,9 @@
         
         // Obtenemos el nombre base del archivo
         const selectedVideoName = videoFiles[index]; 
-        const basePath = 'assets/';
+        
+        // 🚨 RUTA ABSOLUTA RECOMENDADA
+        const basePath = '/assets/'; 
 
         if (!selectedVideoName) {
             console.error("El nombre del archivo no se encontró en la lista de videos. Revisa el array 'videoFiles'.");
@@ -155,8 +154,8 @@
         // Recarga y reproduce el nuevo video
         videoElement.load();
         videoElement.play().catch(error => {
-            // Se usa catch para evitar errores de consola por políticas de autoplay
-            console.warn("Reproducción automática iniciada. (Puede requerir interacción del usuario en algunos navegadores)");
+            // Esto maneja errores de autoplay sin interrumpir la experiencia.
+            console.warn("La reproducción automática falló (puede requerir un clic extra del usuario).");
         });
     }
   </script>
