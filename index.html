@@ -3,36 +3,42 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Video de fondo desde GitHub Pages</title>
+  <title>Selector de Videos de Fondo (Vista Previa)</title>
   <style>
+    /* 🎨 Estilos Base y Fondo */
     body, html {
       margin: 0;
       padding: 0;
       height: 100%;
       font-family: sans-serif;
       color: white;
+      /* Fondo visible hasta que se seleccione el video */
+      background-color: #333; 
     }
 
+    /* Video base */
     .video-background {
       position: fixed;
       top: 0;
       left: 0;
       min-width: 100%;
       min-height: 100%;
-      object-fit: cover;
-      z-index: -1;
+      object-fit: cover; 
+      z-index: -2; 
     }
-
+    
+    /* Fondo Oscuro (Overlay) */
     .overlay {
       position: absolute;
       top: 0;
       left: 0;
       height: 100%;
       width: 100%;
-      background: rgba(0, 0, 0, 0.4);
-      z-index: 0;
+      background: rgba(0, 0, 0, 0.5); 
+      z-index: -1; 
     }
 
+    /* Contenedor principal de contenido */
     .content {
       position: relative;
       z-index: 1;
@@ -42,31 +48,117 @@
       align-items: center;
       text-align: center;
       flex-direction: column;
+      gap: 20px;
     }
 
-    @media (max-width: 767px) {
-      video {
-        display: none;
-      }
+    /* 💡 Estilo de la Tarjeta (Efecto Glass/Desenfoque) */
+    .card-glass {
+      background: rgba(255, 255, 255, 0.1); 
+      border-radius: 15px;
+      padding: 40px;
+      /* Filtro clave para el desenfoque */
+      backdrop-filter: blur(10px); 
+      border: 1px solid rgba(255, 255, 255, 0.2); 
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      max-width: 90%;
+    }
 
+    /* Estilo del Selector */
+    #videoSelector {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      background-color: rgba(255, 255, 255, 0.9);
+      color: #333;
+    }
+    
+    /* Optimización Móvil */
+    @media (max-width: 767px) {
+      video { display: none; }
       .overlay {
-        background: url('fondo.jpg') no-repeat center center;
+        /* Muestra el fondo liso si el video está oculto */
+        background: #333;
         background-size: cover;
       }
     }
   </style>
 </head>
 <body>
-  <video class="video-background" autoplay muted loop playsinline>
-    <source src="fondo.mp4" type="video/mp4">
-    Tu navegador no soporta video HTML5.
-  </video>
+  
+  <video id="backgroundVideo" class="video-background" autoplay muted loop playsinline>
+    </video>
 
   <div class="overlay"></div>
 
   <div class="content">
-    <h1>Mi video de fondo desde GitHub</h1>
-    <p>¡100% alojado gratis!</p>
+    
+    <select id="videoSelector" onchange="loadNewVideo()">
+        <option value="" disabled selected>--- Selecciona un video ---</option> 
+        <option value="video-0">Video 1 (Defecto)</option>
+        <option value="video-1">Video 2 (Demo V1)</option>
+        <option value="video-2">Video 3 (Prueba Final)</option>
+        </select>
+
+    <div class="card-glass">
+      <h1>Selector de Vistas Previas</h1>
+      <p>Selecciona un video de la lista para previsualizarlo.</p>
+    </div>
+    
   </div>
+
+  <script>
+    // 💡 LISTA DE ARCHIVOS REALES (MODIFICA ESTO con los nombres base de tus archivos)
+    const videoFiles = [
+        "fondo",          // video-0 -> assets/fondo.webm & .mp4
+        "demo-v1",        // video-1 -> assets/demo-v1.webm & .mp4
+        "prueba-final",   // video-2 -> assets/prueba-final.webm & .mp4
+        // ... Agrega más nombres base aquí, ej: "clip-final"
+    ];
+
+    function loadNewVideo() {
+        const selector = document.getElementById('videoSelector');
+        const videoElement = document.getElementById('backgroundVideo');
+        
+        // No hacer nada si se selecciona la opción de "Selecciona un video"
+        if (selector.value === "") return; 
+
+        // Extraemos el índice del valor: "video-1" -> 1
+        const index = selector.value.split('-')[1]; 
+        
+        // Obtenemos el nombre base del archivo
+        const selectedVideoName = videoFiles[index]; 
+        const basePath = 'assets/';
+
+        if (!selectedVideoName) {
+            console.error("El nombre del archivo no se encontró en la lista de videos. Revisa el array 'videoFiles'.");
+            return;
+        }
+
+        // Limpieza y carga de nuevas fuentes
+        videoElement.pause();
+        while (videoElement.firstChild) {
+            videoElement.removeChild(videoElement.firstChild);
+        }
+
+        // Prioridad WebM (más pequeño)
+        const webmSource = document.createElement('source');
+        webmSource.src = basePath + selectedVideoName + '.webm';
+        webmSource.type = 'video/webm';
+        videoElement.appendChild(webmSource);
+
+        // Fallback MP4
+        const mp4Source = document.createElement('source');
+        mp4Source.src = basePath + selectedVideoName + '.mp4';
+        mp4Source.type = 'video/mp4';
+        videoElement.appendChild(mp4Source);
+
+        // Recarga y reproduce el nuevo video
+        videoElement.load();
+        videoElement.play().catch(error => {
+            // Se usa catch para evitar errores de consola por políticas de autoplay
+            console.warn("Reproducción automática iniciada. (Puede requerir interacción del usuario en algunos navegadores)");
+        });
+    }
+  </script>
 </body>
 </html>
