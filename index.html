@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Selector de Videos de Fondo (Vista Previa)</title>
   <style>
-    /* 🎨 Estilos Base y Fondo */
     body, html {
       margin: 0;
       padding: 0;
@@ -15,7 +14,6 @@
       background-color: #333;
     }
 
-    /* Video base */
     .video-background {
       position: fixed;
       top: 0;
@@ -28,7 +26,6 @@
       z-index: -2;
     }
 
-    /* Fondo Oscuro (Overlay) */
     .overlay {
       position: absolute;
       top: 0;
@@ -39,7 +36,6 @@
       z-index: -1;
     }
 
-    /* Contenedor principal de contenido */
     .content {
       position: relative;
       z-index: 1;
@@ -52,7 +48,6 @@
       gap: 20px;
     }
 
-    /* 💡 Estilo de la Tarjeta (Efecto Glass/Desenfoque) */
     .card-glass {
       background: rgba(255, 255, 255, 0.1);
       border-radius: 15px;
@@ -69,7 +64,6 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Estilo del Selector */
     #videoSelector {
       padding: 10px;
       font-size: 16px;
@@ -78,7 +72,6 @@
       color: #333;
     }
 
-    /* Optimización Móvil */
     @media (max-width: 767px) {
       video { display: none; }
       .overlay {
@@ -133,7 +126,7 @@
       }
 
       const selectedVideoName = videoFiles[index];
-      const basePath = window.location.origin + '/assets/';
+      const basePath = './assets/'; // Ruta relativa para Netlify o subdirectorios
 
       if (!selectedVideoName) {
         console.error("El nombre del archivo no se encontró en la lista de videos.");
@@ -141,7 +134,9 @@
       }
 
       videoElement.pause();
-      videoElement.querySelectorAll('source').forEach(source => source.remove());
+      while (videoElement.firstChild) {
+        videoElement.removeChild(videoElement.firstChild);
+      }
 
       const webmSource = document.createElement('source');
       webmSource.src = basePath + selectedVideoName + '.webm';
@@ -155,9 +150,12 @@
 
       videoElement.style.display = 'block';
       videoElement.load();
-      videoElement.play().catch(error => {
-        console.warn("La reproducción automática falló (puede requerir un clic extra del usuario).");
-      });
+
+      videoElement.addEventListener('canplay', () => {
+        videoElement.play().catch(() => {
+          console.warn("La reproducción automática fue bloqueada. El usuario debe interactuar.");
+        });
+      }, { once: true });
     }
   </script>
 </body>
