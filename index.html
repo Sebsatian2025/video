@@ -12,23 +12,22 @@
       height: 100%;
       font-family: sans-serif;
       color: white;
-      /* Fondo visible hasta que se seleccione el video */
-      background-color: #333; 
+      background-color: #333;
     }
 
     /* Video base */
-.video-background {
-  position: fixed !important; /* Asegura que se mantenga fijo */
-  top: 0 !important;
-  left: 0 !important;
-  min-width: 100% !important;
-  min-height: 100% !important;
-  width: 100% !important; /* Nuevo: forzamos el 100% */
-  height: 100% !important; /* Nuevo: forzamos el 100% */
-  object-fit: cover !important; 
-  z-index: -2 !important; /* Asegura que esté detrás de todo */
+    .video-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      min-width: 100%;
+      min-height: 100%;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -2;
     }
-    
+
     /* Fondo Oscuro (Overlay) */
     .overlay {
       position: absolute;
@@ -36,8 +35,8 @@
       left: 0;
       height: 100%;
       width: 100%;
-      background: rgba(0, 0, 0, 0.5); 
-      z-index: -1; 
+      background: rgba(0, 0, 0, 0.5);
+      z-index: -1;
     }
 
     /* Contenedor principal de contenido */
@@ -55,13 +54,19 @@
 
     /* 💡 Estilo de la Tarjeta (Efecto Glass/Desenfoque) */
     .card-glass {
-      background: rgba(255, 255, 255, 0.1); 
+      background: rgba(255, 255, 255, 0.1);
       border-radius: 15px;
       padding: 40px;
-      backdrop-filter: blur(10px); 
-      border: 1px solid rgba(255, 255, 255, 0.2); 
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
       max-width: 90%;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     /* Estilo del Selector */
@@ -72,7 +77,7 @@
       background-color: rgba(255, 255, 255, 0.9);
       color: #333;
     }
-    
+
     /* Optimización Móvil */
     @media (max-width: 767px) {
       video { display: none; }
@@ -84,85 +89,76 @@
   </style>
 </head>
 <body>
-  
-  <video id="backgroundVideo" class="video-background" autoplay muted loop playsinline></video>
 
+  <video id="backgroundVideo" class="video-background" autoplay muted loop playsinline></video>
   <div class="overlay"></div>
 
   <div class="content">
-    
-    <select id="videoSelector" onchange="loadNewVideo()">
-        <option value="" disabled selected>--- Selecciona un video ---</option> 
-        <option value="video-0">Video 1 (Fondo)</option>
-        <option value="video-1">Video 2 (Fondo2)</option>
-        <option value="video-2">Video 3 (Fondo3)</option>
-        </select>
+    <label for="videoSelector">Selecciona un video:</label>
+    <select id="videoSelector" onchange="loadNewVideo()" aria-label="Selector de video de fondo">
+      <option value="" disabled selected>--- Selecciona un video ---</option>
+      <option value="video-0">Video 1 (Fondo)</option>
+      <option value="video-1">Video 2 (Fondo2)</option>
+      <option value="video-2">Video 3 (Fondo3)</option>
+    </select>
 
     <div class="card-glass">
       <h1>Selector de Vistas Previas</h1>
       <p>Selecciona un video de la lista para previsualizarlo.</p>
     </div>
-    
   </div>
 
-<script>
-    // 💡 LISTA DE ARCHIVOS REALES (¡AJUSTA ESTO!)
+  <script>
     const videoFiles = [
-        "fondo",      // video-0 -> Nombre del archivo base (fondo.webm y fondo.mp4)
-        "fondo2",     // video-1
-        "fondo3",     // video-2
-        // ...
+      "fondo",   // video-0
+      "fondo2",  // video-1
+      "fondo3"   // video-2
     ];
 
     function loadNewVideo() {
-        const selector = document.getElementById('videoSelector');
-        const videoElement = document.getElementById('backgroundVideo');
-        
-        // No hacer nada si se selecciona la opción de "Selecciona un video"
-        if (selector.value === "") return; 
+      const selector = document.getElementById('videoSelector');
+      const videoElement = document.getElementById('backgroundVideo');
 
-        // Extraemos el índice del valor: "video-1" -> 1
-        const index = selector.value.split('-')[1]; 
-        
-        // Obtenemos el nombre base del archivo
-        const selectedVideoName = videoFiles[index]; 
-        
-        // 🚨 RUTA ABSOLUTA RECOMENDADA
-        const basePath = '/assets/'; 
+      if (!selector || !videoElement) {
+        console.error("No se encontró el selector o el elemento de video.");
+        return;
+      }
 
-        if (!selectedVideoName) {
-            console.error("El nombre del archivo no se encontró en la lista de videos. Revisa el array 'videoFiles'.");
-            return;
-        }
+      if (selector.value === "") return;
 
-        // Limpieza y carga de nuevas fuentes
-        videoElement.pause();
-        while (videoElement.firstChild) {
-            videoElement.removeChild(videoElement.firstChild);
-        }
+      const index = parseInt(selector.value.split('-')[1], 10);
+      if (isNaN(index)) {
+        console.error("Índice inválido en el selector.");
+        return;
+      }
 
-        // Prioridad WebM (más pequeño)
-        const webmSource = document.createElement('source');
-        webmSource.src = basePath + selectedVideoName + '.webm';
-        webmSource.type = 'video/webm';
-        videoElement.appendChild(webmSource);
+      const selectedVideoName = videoFiles[index];
+      const basePath = window.location.origin + '/assets/';
 
-        // Fallback MP4
-        const mp4Source = document.createElement('source');
-        mp4Source.src = basePath + selectedVideoName + '.mp4';
-        mp4Source.type = 'video/mp4';
-        videoElement.appendChild(mp4Source);
+      if (!selectedVideoName) {
+        console.error("El nombre del archivo no se encontró en la lista de videos.");
+        return;
+      }
 
-        // 💡 SOLUCIÓN APLICADA: Asegura que el elemento sea visible.
-        // Esto es necesario ya que el video puede no estar dibujado inicialmente.
-        videoElement.style.display = 'block'; 
+      videoElement.pause();
+      videoElement.querySelectorAll('source').forEach(source => source.remove());
 
-        // Recarga y reproduce el nuevo video
-        videoElement.load();
-        videoElement.play().catch(error => {
-            console.warn("La reproducción automática falló (puede requerir un clic extra del usuario).");
-        });
+      const webmSource = document.createElement('source');
+      webmSource.src = basePath + selectedVideoName + '.webm';
+      webmSource.type = 'video/webm';
+      videoElement.appendChild(webmSource);
+
+      const mp4Source = document.createElement('source');
+      mp4Source.src = basePath + selectedVideoName + '.mp4';
+      mp4Source.type = 'video/mp4';
+      videoElement.appendChild(mp4Source);
+
+      videoElement.style.display = 'block';
+      videoElement.load();
+      videoElement.play().catch(error => {
+        console.warn("La reproducción automática falló (puede requerir un clic extra del usuario).");
+      });
     }
-</script>
+  </script>
 </body>
 </html>
