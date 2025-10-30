@@ -103,10 +103,10 @@
     
   </div>
 
-  <script>
+<script>
     // 💡 LISTA DE ARCHIVOS REALES (¡AJUSTA ESTO!)
     const videoFiles = [
-        "fondo",      // video-0
+        "fondo",      // video-0 -> Nombre del archivo base (fondo.webm y fondo.mp4)
         "fondo2",     // video-1
         "fondo3",     // video-2
         // ...
@@ -151,13 +151,16 @@
         mp4Source.type = 'video/mp4';
         videoElement.appendChild(mp4Source);
 
+        // 💡 SOLUCIÓN APLICADA: Asegura que el elemento sea visible.
+        // Esto es necesario ya que el video puede no estar dibujado inicialmente.
+        videoElement.style.display = 'block'; 
+
         // Recarga y reproduce el nuevo video
         videoElement.load();
         videoElement.play().catch(error => {
-            // Esto maneja errores de autoplay sin interrumpir la experiencia.
             console.warn("La reproducción automática falló (puede requerir un clic extra del usuario).");
         });
     }
-  </script>
+</script>
 </body>
 </html>
